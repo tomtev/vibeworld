@@ -46,47 +46,75 @@ const bounds = new Box3(
 </script>
 
 <template>
-  <TresCanvas window-size clear-color="#82DBC5">
-    <TresPerspectiveCamera :position="[9, 9, 9]" />
-    <OrbitControls />
+  <div class="container">
+    <div class="nav-bar">
+      <h1>Voxel World</h1>
+      <div class="nav-links">
+        <NuxtLink to="/" class="nav-link active">Home</NuxtLink>
+        <NuxtLink to="/voxel-examples" class="nav-link">Voxel Examples</NuxtLink>
+      </div>
+    </div>
     
-    <!-- Voxel world -->
-    <Voxels
-      :generator="generator"
-      :get-texture="getTexture"
-      :get-transparent="getTransparent"
-      :bounds="bounds"
-      follow-camera
-    />
-    
-    <!-- Original shapes -->
-    <TresMesh :position="[-2, 2, 0]" :rotation="[0, Math.PI, 0]">
-      <TresConeGeometry :args="[1, 1.5, 3]" />
-      <TresMeshToonMaterial color="#82DBC5" />
-    </TresMesh>
-    <TresMesh :position="[0, 0, 0]" cast-shadow>
-      <TresBoxGeometry :args="[1.5, 1.5, 1.5]" />
-      <TresMeshToonMaterial color="#4F4F4F" />
-    </TresMesh>
-    <TresMesh :position="[2, -2, 0]">
-      <TresSphereGeometry />
-      <TresMeshToonMaterial color="#FBB03B" />
-    </TresMesh>
-    <TresDirectionalLight :position="[0, 2, 4]" :intensity="1.2" cast-shadow />
-  </TresCanvas>
+    <TresCanvas window-size clear-color="#82DBC5">
+      <TresPerspectiveCamera :position="[9, 9, 9]" />
+      <OrbitControls />
+      <TresAmbientLight :intensity="0.5" />
+      <TresDirectionalLight :position="[10, 10, 10]" :intensity="1" cast-shadow />
+      <Voxels 
+        :generator="generator" 
+        :bounds="bounds" 
+        :get-texture="getTexture"
+        :get-transparent="getTransparent"
+        :follow-camera="true"
+      />
+    </TresCanvas>
+  </div>
 </template>
 
-<style>
-html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+<style scoped>
+.container {
+  position: relative;
   width: 100%;
+  height: 100vh;
 }
-#app {
-  height: 100%;
+
+.nav-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  background-color: #000;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  z-index: 10;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 </style>

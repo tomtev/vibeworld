@@ -1,13 +1,22 @@
 import {
-  DataArrayTexture,
   DoubleSide,
   MeshDepthMaterial,
   MeshStandardMaterial,
   RGBADepthPacking,
   ShaderChunk,
-  WebGLProgramParametersWithUniforms,
+} from 'three';
+import type {
+  DataArrayTexture,
   WebGLRenderer,
 } from 'three';
+
+// Define a compatible WebGLProgramParametersWithUniforms type based on Three.js v0.174.0
+interface WebGLProgramParametersWithUniforms {
+  vertexShader: string;
+  fragmentShader: string;
+  uniforms: Record<string, { value: unknown }>;
+  defines?: Record<string, unknown>;
+}
 
 const Rotation = /* glsl */`
 mat3 rotateX(const in float rad) {
@@ -323,7 +332,7 @@ export class ChunkMaterial extends MeshStandardMaterial {
       this.needsUpdate = true;
     }
     this.ORMAtlas.value = atlas;
-    this.metalness = !!atlas ? 1 : 0;
+    this.metalness = atlas ? 1 : 0;
   }
 }
 

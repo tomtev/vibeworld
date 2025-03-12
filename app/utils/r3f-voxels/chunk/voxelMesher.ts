@@ -1,5 +1,6 @@
 import { Box3, Vector3 } from 'three';
-import { ChunkData, chunkSize, VoxelFace } from '../data/Data';
+import { chunkSize, VoxelFace } from '../data/Data';
+import type { ChunkDataType } from '../data/Data';
 
 const auxBoxA = new Box3();
 const auxBoxB = new Box3();
@@ -32,7 +33,7 @@ const getAO = (n1: boolean, n2: boolean, n3: boolean) => {
 };
 
 const getVoxel = (
-  chunks: ChunkData[],
+  chunks: ChunkDataType[],
   x: number,
   y: number,
   z: number
@@ -68,7 +69,7 @@ const getVoxel = (
 };
 
 export const voxelMesher = (
-  chunks: ChunkData[],
+  chunks: ChunkDataType[],
   getTexture: (voxel: number, face: VoxelFace, isTop: boolean) => number,
   getTransparent: (voxel: number) => boolean
 ) => {
@@ -136,7 +137,7 @@ export const voxelMesher = (
 };
 
 export const voxelColliders = (
-  chunks: ChunkData[]
+  chunks: ChunkDataType[]
 ) => {
   const colliders: { position: [number, number, number], size: [number, number, number] }[] = [];
   map.fill(0);

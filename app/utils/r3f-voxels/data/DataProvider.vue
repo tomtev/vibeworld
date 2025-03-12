@@ -20,6 +20,13 @@ const dataStore = createDataStore(
 
 // Provide the data store to all child components
 provide('voxelDataStore', dataStore)
+// Also provide it with the key used in useVoxels
+provide('voxelData', dataStore)
+
+// Export the component
+defineOptions({
+  name: 'DataProvider'
+})
 </script>
 
 <template>

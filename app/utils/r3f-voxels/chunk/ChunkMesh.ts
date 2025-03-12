@@ -1,19 +1,31 @@
 import {
-  Box3,
-  BufferAttribute,
   InstancedBufferGeometry,
   InstancedInterleavedBuffer,
   InterleavedBufferAttribute,
-  Intersection,
   Matrix4,
   Mesh,
-  Object3D,
-  Object3DEventMap,
   PlaneGeometry,
-  Raycaster,
   Sphere,
   Vector4,
 } from 'three';
+import type {
+  Box3,
+  BufferAttribute,
+  Object3D,
+  Object3DEventMap,
+  Raycaster,
+} from 'three';
+
+// Define a compatible Intersection type based on Three.js v0.174.0
+type Intersection<T extends Object3D = Object3D> = {
+  distance: number;
+  point: import('three').Vector3;
+  face?: import('three').Face | null;
+  faceIndex?: number | null;
+  object: T;
+  uv?: import('three').Vector2;
+  instanceId?: number;
+};
 
 const _face = new Vector4();
 const _intersects: Intersection<Object3D<Object3DEventMap>>[] = [];
@@ -74,7 +86,7 @@ export class ChunkMesh extends Mesh {
     const { instance, rotations } = ChunkMesh.getGeometry();
     const { matrixWorld, visible } = this;
     const geometry = this.geometry as InstancedBufferGeometry;
-    if (!visible) {
+    if (!visible || !instance || !rotations) {
       return;
     }
     _sphere.copy(geometry.boundingSphere!);
@@ -85,13 +97,19 @@ export class ChunkMesh extends Mesh {
     const face = geometry.getAttribute('face') as BufferAttribute;
     for (let i = 0, l = geometry.instanceCount; i < l; i++) {
       _face.fromBufferAttribute(face, i);
+      const faceIndex = Math.floor(_face.w % 6);
+      const rotation = rotations[faceIndex];
+      if (!rotation) continue;
+      
       instance.matrixWorld
         .multiplyMatrices(matrixWorld, _translation.makeTranslation(_face.x, _face.y, _face.z))
-        .multiply(rotations[Math.floor(_face.w % 6)]);
+        .multiply(rotation);
       instance.raycast(raycaster, _intersects);
       _intersects.forEach((intersect) => {
         intersect.object = this;
-        intersect.face?.normal.transformDirection(instance.matrixWorld);
+        if (intersect.face?.normal) {
+          intersect.face.normal.transformDirection(instance.matrixWorld);
+        }
         intersects.push(intersect);
       });
       _intersects.length = 0;
@@ -109,7 +127,7 @@ export class ChunkMesh extends Mesh {
     const buffer = new InstancedInterleavedBuffer(faces, 8, 1);
     geometry.setAttribute('face', new InterleavedBufferAttribute(buffer, 4, 0));
     geometry.setAttribute('ao', new InterleavedBufferAttribute(buffer, 4, 4));
-    geometry.instanceCount = (geometry as any)._maxInstanceCount = count;
+    geometry.instanceCount = count;
     this.visible = true;
   }
 }

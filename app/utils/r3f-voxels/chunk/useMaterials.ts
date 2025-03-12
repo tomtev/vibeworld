@@ -1,5 +1,6 @@
-import React from 'react';
-import { DataArrayTexture, SRGBColorSpace, Texture } from 'three';
+import { ref, watchEffect } from 'vue';
+import { DataArrayTexture, SRGBColorSpace } from 'three';
+import type { Texture } from 'three';
 import { ChunkMaterial, ChunkDepthMaterial } from './ChunkMaterial';
 
 const getAtlasTexture = (atlas: Texture) => {
@@ -33,60 +34,54 @@ export const useMaterials = (
     fragmentShader?: string;
   }
 ) => {
-  const atlases = {
-    atlas: React.useRef<DataArrayTexture | null>(null),
-    normalAtlas: React.useRef<DataArrayTexture | null>(null),
-    occlusionRoughnessMetalnessAtlas: React.useRef<DataArrayTexture | null>(null),
-  };
-  const depthMaterial = React.useRef<ChunkDepthMaterial>(null!);
-  if (!depthMaterial.current) {
-    depthMaterial.current = new ChunkDepthMaterial();
-  }
-  const opaqueMaterial = React.useRef<ChunkMaterial>(null!);
-  if (!opaqueMaterial.current) {
-    opaqueMaterial.current = new ChunkMaterial(false);
-  }
-  const transparentMaterial = React.useRef<ChunkMaterial>(null!);
-  if (!transparentMaterial.current) {
-    transparentMaterial.current = new ChunkMaterial(true, shaders || undefined);
-  }
-  React.useLayoutEffect(() => {
-    if (atlases.atlas.current) {
-      atlases.atlas.current.dispose();
+  const atlasRef = ref<DataArrayTexture | null>(null);
+  const normalAtlasRef = ref<DataArrayTexture | null>(null);
+  const occlusionRoughnessMetalnessAtlasRef = ref<DataArrayTexture | null>(null);
+  
+  const depthMaterial = ref<ChunkDepthMaterial>(new ChunkDepthMaterial());
+  const opaqueMaterial = ref<ChunkMaterial>(new ChunkMaterial(false));
+  const transparentMaterial = ref<ChunkMaterial>(new ChunkMaterial(true, shaders || undefined));
+  
+  watchEffect(() => {
+    if (atlasRef.value) {
+      atlasRef.value.dispose();
     }
     let texture = atlas;
     if (texture && !(texture instanceof DataArrayTexture)) {
       texture = getAtlasTexture(texture);
       texture.colorSpace = SRGBColorSpace;
     }
-    atlases.atlas.current = texture as (DataArrayTexture | null);
-    opaqueMaterial.current.setAtlas(atlases.atlas.current);
-    transparentMaterial.current.setAtlas(atlases.atlas.current);
-  }, [atlas]);
-  React.useLayoutEffect(() => {
-    if (atlases.normalAtlas.current) {
-      atlases.normalAtlas.current.dispose();
+    atlasRef.value = texture as (DataArrayTexture | null);
+    opaqueMaterial.value.setAtlas(atlasRef.value);
+    transparentMaterial.value.setAtlas(atlasRef.value);
+  });
+  
+  watchEffect(() => {
+    if (normalAtlasRef.value) {
+      normalAtlasRef.value.dispose();
     }
     let texture = normalAtlas;
     if (texture && !(texture instanceof DataArrayTexture)) {
       texture = getAtlasTexture(texture);
     }
-    atlases.normalAtlas.current = texture as (DataArrayTexture | null);
-    opaqueMaterial.current.setNormalAtlas(atlases.normalAtlas.current);
-    transparentMaterial.current.setNormalAtlas(atlases.normalAtlas.current);
-  }, [normalAtlas]);
-  React.useLayoutEffect(() => {
-    if (atlases.occlusionRoughnessMetalnessAtlas.current) {
-      atlases.occlusionRoughnessMetalnessAtlas.current.dispose();
+    normalAtlasRef.value = texture as (DataArrayTexture | null);
+    opaqueMaterial.value.setNormalAtlas(normalAtlasRef.value);
+    transparentMaterial.value.setNormalAtlas(normalAtlasRef.value);
+  });
+  
+  watchEffect(() => {
+    if (occlusionRoughnessMetalnessAtlasRef.value) {
+      occlusionRoughnessMetalnessAtlasRef.value.dispose();
     }
     let texture = occlusionRoughnessMetalnessAtlas;
     if (texture && !(texture instanceof DataArrayTexture)) {
       texture = getAtlasTexture(texture);
     }
-    atlases.occlusionRoughnessMetalnessAtlas.current = texture as (DataArrayTexture | null);
-    opaqueMaterial.current.setOcclusionRoughnessMetalnessAtlas(atlases.occlusionRoughnessMetalnessAtlas.current);
-    transparentMaterial.current.setOcclusionRoughnessMetalnessAtlas(atlases.occlusionRoughnessMetalnessAtlas.current);
-  }, [occlusionRoughnessMetalnessAtlas]);
+    occlusionRoughnessMetalnessAtlasRef.value = texture as (DataArrayTexture | null);
+    opaqueMaterial.value.setOcclusionRoughnessMetalnessAtlas(occlusionRoughnessMetalnessAtlasRef.value);
+    transparentMaterial.value.setOcclusionRoughnessMetalnessAtlas(occlusionRoughnessMetalnessAtlasRef.value);
+  });
+  
   return {
     depthMaterial,
     opaqueMaterial,

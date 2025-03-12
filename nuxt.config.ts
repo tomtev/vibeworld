@@ -6,10 +6,7 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
   // Nuxt Modules
   // https://nuxt.com/modules
-  modules: [
-    '@nuxthub/core',
-    '@nuxt/eslint'
-  ],
+  modules: ['@nuxthub/core', '@nuxt/eslint', '@tresjs/nuxt'],
   hub: {
     database: true,
     kv: true,
@@ -21,6 +18,9 @@ export default defineNuxtConfig({
       // Enable Server API documentation within NuxtHub
       openAPI: true
     }
+  },
+  tres: {
+    glsl: true
   },
   // Development
   devtools: { enabled: true },
